@@ -1,0 +1,35 @@
+[package]
+name = "wrapped-token"
+version = "0.8.0"
+authors = ["Fantohm", "WilliamYu"]
+edition = "2021"
+description = "Implement Wrapped Token using Cw20Base"
+license = "Apache-2.0"
+repository = "https://github.com/CosmWasm/cosmwasm-plus"
+homepage = "https://cosmwasm.com"
+documentation = "https://docs.cosmwasm.com"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+backtraces = ["cosmwasm-std/backtraces"]
+# use library feature to disable all instantiate/execute/query exports
+library = []
+
+[dependencies]
+cw0 = { path = "../../packages/cw0", version = "0.8.0" }
+cw2 = { path = "../../packages/cw2", version = "0.8.0" }
+cw20 = { path = "../../packages/cw20", version = "0.8.0" }
+cw-controllers = { path = "../../packages/controllers", version = "0.8.0" }
+cw20-base = { path = "../../contracts/cw20-base", version = "0.8.0", features = ["library"] }
+cosmwasm-std = { version = "0.16.0", features = ["staking"] }
+cw-storage-plus = { path = "../../packages/storage-plus", version = "0.8.0" }
+schemars = "0.8.1"
+serde = { version = "1.0.103", default-features = false, features = ["derive"] }
+thiserror = { version = "1.0.23" }
+
+[dev-dependencies]
+cosmwasm-schema = { version = "0.16.0" }
