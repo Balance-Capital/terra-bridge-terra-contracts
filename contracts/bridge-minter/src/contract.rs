@@ -17,7 +17,7 @@ use wrapped_token::msg::{ExecuteMsg as WrappedTokenExecuteMsg/* , QueryMsg as Wr
 
 use crate::error::ContractError;
 use crate::msg::{CountResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{State, STATE, PUB_KEY};
+use crate::state::{State, STATE, PUB_KEY, BRIDGE_STATE};
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:bridge-minter";
@@ -69,6 +69,12 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 }
 
 pub fn execute_mint (deps: DepsMut, _token: String, _to: String, _amount: Uint128, _txHash: &str, _signature: &str ) -> Result<Response, ContractError> {
+
+    let bridge_state = BRIDGE_STATE.load(deps.storage)?;
+    if !bridge_state {
+        return Err(ContractError::Unverified {})
+    }
+
     let state = STATE.load(deps.storage)?;
     let mut nonce: Uint128 = state.nonce;
     let hash = getk256message(nonce, _token.clone(), _to.clone(), _amount, _txHash)?;
@@ -91,6 +97,34 @@ pub fn execute_mint (deps: DepsMut, _token: String, _to: String, _amount: Uint12
                 // .add_attribute("balance", balance.balance)
                 .add_attribute("verify", "ok")
             )
+        },
+        false => Err(ContractError::Unverified {})
+    }
+}
+
+pub fn execute_change_bridge_state(deps: DepsMut, new_bridge_state: bool, _txHash: &str, _signature: &str) -> Result<Response, ContractError> {
+    let mut hasher = Keccak256::new();
+    let bridge_state_to_string: &str;
+    match new_bridge_state {
+        true => {
+            bridge_state_to_string = "1";
+        },
+        false => {
+            bridge_state_to_string = "0";
+        }
+    }
+    // hasher.update(format!("\x19Ethereum Signed Message:\n{}", message.len()));
+    hasher.update(bridge_state_to_string.to_string());
+    // hasher.update(_txHash.to_owned());
+    let hash = hasher.finalize();
+    let hash = format!("{:X}", hash);
+    let is_verified = verify(deps.as_ref(), &hex::decode(&hash).unwrap(), _signature)?;
+
+    match is_verified {
+        true => {
+            BRIDGE_STATE.save(deps.storage, &new_bridge_state)?;
+            Ok(Response::new()
+                .add_attribute("bridge_state", bridge_state_to_string))
         },
         false => Err(ContractError::Unverified {})
     }

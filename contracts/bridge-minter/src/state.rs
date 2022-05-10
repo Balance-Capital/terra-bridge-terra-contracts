@@ -15,3 +15,4 @@ pub struct State {
 
 pub const PUB_KEY: Item<String> = Item::new("pub_key");
 pub const STATE: Item<State> = Item::new("state");
+pub const BRIDGE_STATE: Item<bool> = Item::new("bridge_state");

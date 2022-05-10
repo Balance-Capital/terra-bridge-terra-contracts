@@ -11,6 +11,9 @@ pub enum ContractError {
 
     #[error("Unverified")]
     Unverified {},
+
+    #[error("BridgeNotLive")]
+    BridgeNotLive {},
     // Add any other custom errors you like here.
-    // Look at https://docs.rs/thiserror/1.0.21/thiserror/ for details.
+    // Look at https://docs.rs/thiseerror/1.0.21/thiserror/ for details.
 }
